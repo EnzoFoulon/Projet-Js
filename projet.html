@@ -1,0 +1,181 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <title>Casse Brique</title>
+<style type='text/css'></style>
+</head>
+<body>
+<script type="text/javascript"> 
+// Constantes du jeu
+var Lignes = 5;
+var Brique_Ligne = 8;
+var Brique_Width = 48;
+var Brique_Height = 15;
+var Espace = 2;
+var Barre_Width = 150;
+var Barre_Height = 10;
+var Deplacement_Balle = 15;
+var Jeu_Width = 400;
+var Jeu_Height = 300;   
+var Brique = ["#225042", "#224f50", "#224950", "#224250", "#223850"];
+var Balle = "#0de344";
+var Dim_Balle = 8;
+var V_Balle = 2; 
+// Variables
+var tabBriques; // Tableau virtuel contenant les briques
+var barreX; // Position en X de la barre: Changement dynamique avec clavier / souris
+var barreY; // Position en Y de la barre: Ne bougera pas.
+var context;
+var balleX = 100;
+var balleY = 250;
+var dirBalleX = 1;
+var dirBalleY = -1;
+var boucleJeu;
+var limiteBriques = (Espace+Brique_Height)*Lignes;
+var Win = 0; 
+window.addEventListener('load', function () {
+// On récupère l'objet canvas
+var elem = document.getElementById('canvasElem');
+if (!elem || !elem.getContext) {
+return;
+} 
+// On récupère le contexte 2D
+context = elem.getContext('2d');
+if (!context) {
+return;
+} 
+// Initialisations des variables
+Jeu_Width = elem.width;
+Jeu_Height = elem.height;
+barreX = (Jeu_Width/2)-(Barre_Width/2);
+barreY = (Jeu_Height-Barre_Height); 
+// Le navigateur est compatible, on peut continuer: On initialise le jeu.
+creerBriques(context, Lignes, Brique_Ligne, Brique_Width, Brique_Height, Espace);
+// Boucle de rafraichissement du contexte 2D
+boucleJeu = setInterval(refreshGame, 10); 
+// Gestion des évènements
+window.document.onkeydown = checkDepla; 
+}, false); 
+function refreshGame() {
+
+// On efface la zone
+clearContexte(context, 0, Jeu_Width, 0, Jeu_Height);
+ 
+// On réaffiche le nécessaire
+ 
+Win = 1;
+// Réaffichage des briques
+for (var i=0; i < tabBriques.length; i++) {
+context.fillStyle = Brique[i];
+for (var j=0; j < tabBriques[i].length; j++) {
+if (tabBriques[i][j] == 1) {
+context.fillRect((j*(Brique_Width+Espace)),(i*(Brique_Height+Espace)),Brique_Width,Brique_Height);
+Win = 0; // Le joueur n'a pas gagné, il reste toujours au moins une brique
+}
+}
+}
+ 
+// On vérifie si le joueur à gagné
+if ( Win ) gagne(); 
+// Réaffichage de la barre
+context.fillStyle = "#333333";
+context.fillRect(barreX,barreY,Barre_Width,Barre_Height);
+// Calcul de la nouvelle position de la balle 
+if ( (balleX + dirBalleX * V_Balle) >  Jeu_Width) dirBalleX = -1;
+else if ( (balleX + dirBalleX * V_Balle) <  0) dirBalleX = 1;
+if ( (balleY + dirBalleY * V_Balle) >  Jeu_Height) perdu();
+else {
+if ( (balleY + dirBalleY * V_Balle) <  0) dirBalleY = 1;
+else {
+if ( ((balleY + dirBalleY * V_Balle) > (Jeu_Height - Barre_Height)) && ((balleX + dirBalleX * V_Balle) >= barreX) && ((balleX + dirBalleX * V_Balle) <= (barreX+Barre_Width))) {
+dirBalleY = -1;
+dirBalleX = 2*(balleX-(barreX+Barre_Width/2))/Barre_Width;
+}
+}
+} 
+// Test des collisions avec les briques
+if ( balleY <= limiteBriques) {
+// On est dans la zone des briques
+var ligneY = Math.floor(balleY/(Brique_Height+Espace));
+var ligneX = Math.floor(balleX/(Brique_Width+Espace));
+if ( tabBriques[ligneY][ligneX] == 1 ) {
+tabBriques[ligneY][ligneX] = 0;
+dirBalleY = 1;
+}
+}
+balleX += dirBalleX * V_Balle;
+balleY += dirBalleY * V_Balle; 
+// Affichage de la balle
+context.fillStyle = Balle;
+context.beginPath();
+context.arc(balleX, balleY, Dim_Balle, 0, Math.PI*2, true);
+context.closePath();
+context.fill();
+} 
+function checkDepla(e) {
+// Flêche de droite préssée
+if (event.code === "ArrowRight") {
+if ( (barreX+Deplacement_Balle+Barre_Width) <= Jeu_Width ) barreX += Deplacement_Balle;
+}
+// Flêche de gauche préssée
+else if (event.code === "ArrowLeft") {
+if ( ((barreX-Deplacement_Balle)) >= 0 )  barreX -= Deplacement_Balle;
+}
+} 
+function perdu() {
+clearInterval(boucleJeu);
+// Ajoutez ce code dans la fonction gameOver()
+
+if (confirm("Perdu ! Voulez-vous recommencer ?")) {
+  document.location.reload();
+} 
+else {
+    restartGame();
+}
+
+// Ajoutez cette fonction pour redémarrer le jeu
+function restartGame() {
+  // Remettre les variables du jeu à leur état initial
+  paddleX = (canvas.width - PADDLE_WIDTH) / 2;
+  dx = 2;
+  dy = -2;
+  score = 0;
+  brickMatrix = createBrickMatrix();
+
+  // Reprendre le jeu
+  requestAnimationFrame(draw);
+}
+}
+function gagne() {
+clearInterval(boucleJeu);
+alert("Bravo vous avez gagné !");
+}
+function clearContexte(ctx, startwidth, ctxwidth, startheight, ctxheight) {
+ctx.clearRect(startwidth, startheight, ctxwidth, ctxheight);
+} 
+// Fonction permettant de créer les briques du jeu
+function creerBriques(ctx, nbrLignes, nbrParLigne, largeur, hauteur, espace) { 
+// Tableau virtuel: On initialise les lignes de briques
+tabBriques = new Array(nbrLignes); 
+for (var i=0; i < nbrLignes; i++) { 
+// Tableau virtuel: On initialise les briques de la ligne
+tabBriques[i] = new Array(nbrParLigne); 
+// Affichage: On attribue une couleur aux briques de la ligne
+ctx.fillStyle = Brique[i]; 
+for (var j=0; j < nbrParLigne; j++) { 
+// Affichage: On affiche une nouvelle brique
+ctx.fillRect((j*(largeur+espace)),(i*(hauteur+espace)),largeur,hauteur); 
+// Tableau virtuel: On attribue à la case actuelle la valeur 1 = Une brique existe encore
+tabBriques[i][j] = 1;
+}
+} 
+// Nos briques sont initialisées.
+return 1;
+}
+</script>
+<div id='conteneur'>
+<canvas id="canvasElem" width="400" height="300">
+
+</body>
+</html>
