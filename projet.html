@@ -4,30 +4,32 @@
   <meta charset="utf-8">
   <title>Casse Brique</title>
 <style type='text/css'></style>
+<link rel="stylesheet" href="style.css"> 
+<link rel="shortcut icon" type="image/png" href="icone.png"/>
 </head>
 <body>
 <script type="text/javascript"> 
 // Constantes du jeu
 var Lignes = 5;
 var Brique_Ligne = 8;
-var Brique_Width = 48;
-var Brique_Height = 15;
-var Espace = 2;
+var Brique_Width = 97;
+var Brique_Height = 30;
+var Espace = 4;
 var Barre_Width = 150;
 var Barre_Height = 10;
-var Deplacement_Balle = 15;
-var Jeu_Width = 400;
-var Jeu_Height = 300;   
+var Deplacement_Balle = 30;
+var Jeu_Width = 800;
+var Jeu_Height = 600;   
 var Brique = ["#225042", "#224f50", "#224950", "#224250", "#223850"];
-var Balle = "#0de344";
-var Dim_Balle = 8;
-var V_Balle = 2; 
+var Balle = "#110de3";
+var Dim_Balle = 12;
+var V_Balle = 3; 
 // Variables
 var tabBriques; 
 var barreX; 
 var barreY; 
 var context;
-var balleX = 100;
+var balleX = 150;
 var balleY = 250;
 var dirBalleX = 1;
 var dirBalleY = -1;
@@ -75,7 +77,7 @@ Win = 0;
 }
 }
 }
- 
+
 // Vérification du win
 if ( Win ) gagne(); 
 // Réaffichage de la barre
@@ -96,11 +98,11 @@ dirBalleX = 2*(balleX-(barreX+Barre_Width/2))/Barre_Width;
 } 
 // Briques collision
 if ( balleY <= limiteBriques) {
-var ligneY = Math.floor(balleY/(Brique_Height+Espace));
-var ligneX = Math.floor(balleX/(Brique_Width+Espace));
-if ( tabBriques[ligneY][ligneX] == 1 ) {
-tabBriques[ligneY][ligneX] = 0;
-dirBalleY = 1;
+  var ligneY = Math.floor((balleY - Dim_Balle/2)/(Brique_Height+Espace));
+var ligneX = Math.floor((balleX - Dim_Balle/2)/(Brique_Width+Espace));
+if ( ligneY >= 0 && ligneY < Lignes && ligneX >= 0 && ligneX < Brique_Ligne && tabBriques[ligneY][ligneX] == 1 ) {
+  tabBriques[ligneY][ligneX] = 0;
+  dirBalleY = 1;
 }
 }
 balleX += dirBalleX * V_Balle;
@@ -112,16 +114,22 @@ context.arc(balleX, balleY, Dim_Balle, 0, Math.PI*2, true);
 context.closePath();
 context.fill();
 } 
-function checkDepla(e) {
-// Déplacement
-Paddle.prototype.move = function (direction) {
-  if (direction === "left" && this.x > 0) {
-    this.x -= this.speed;
-  } else if (direction === "right" && this.x < canvas.width - this.width) {
-    this.x += this.speed;
+// fonction déplacement barre
+function moveBarre(direction) {
+  if (direction === "left" && barreX > 0) {
+    barreX -= Deplacement_Balle;
+  } else if (direction === "right" && barreX < Jeu_Width - Barre_Width) {
+    barreX += Deplacement_Balle;
   }
 }
-} 
+function checkDepla(e) {
+  if (e.keyCode == 37) {
+    moveBarre("left");
+  } else if (e.keyCode == 39) {
+    moveBarre("right");
+  }
+}
+// perdu
 function perdu() {
 clearInterval(boucleJeu);
 
@@ -144,25 +152,44 @@ function restartGame() {
   requestAnimationFrame(draw);
 }
 }
+function nextlevel(){
+  Brique_Ligne = Brique_Ligne+1;
+  Brique_Width = Brique_Width-10;
+  V_Balle = V_balle+0.1;
+
+  if(Brique_Ligne>=10){
+    Lignes = Lignes+1;
+  }
+
+  requestAnimationFrame(draw);
+}
+// win
 function gagne() {
 clearInterval(boucleJeu);
-alert("Bravo vous avez gagné !");
-}
-function clearContexte(ctx, startwidth, ctxwidth, startheight, ctxheight) {
-ctx.clearRect(startwidth, startheight, ctxwidth, ctxheight);
+if (confirm("Bravo vous avez gagné ! Voulez vous passez au niveau suivant ?")) {
+  document.location.reload();
 } 
+else {
+    nextlevel();
+}
+}
+
+function clearContexte(context, startwidth, ctxwidth, startheight, ctxheight) {
+context.clearRect(startwidth, startheight, ctxwidth, ctxheight);
+} 
+
 // Création des briques
-function creerBriques(ctx, nbrLignes, nbrParLigne, largeur, hauteur, espace) { 
+function creerBriques(context, Lignes, Brique_Ligne, Brique_Width, Brique_Height, Espace) { 
 // Lignes des briques
-tabBriques = new Array(nbrLignes); 
-for (var i=0; i < nbrLignes; i++) { 
+tabBriques = new Array(Lignes); 
+for (var i=0; i < Lignes; i++) { 
 
-tabBriques[i] = new Array(nbrParLigne); 
+tabBriques[i] = new Array(Brique_Ligne); 
 
-ctx.fillStyle = Brique[i]; 
-for (var j=0; j < nbrParLigne; j++) { 
+context.fillStyle = Brique[i]; 
+for (var j=0; j < Brique_Ligne; j++) { 
 
-ctx.fillRect((j*(largeur+espace)),(i*(hauteur+espace)),largeur,hauteur); 
+context.fillRect((j*(Brique_Width+Espace)),(i*(Brique_Height+Espace)),Brique_Width,Brique_Height); 
 // Valeur pour que la brique soit encore présente
 tabBriques[i][j] = 1;
 }
@@ -171,7 +198,7 @@ return 1;
 }
 </script>
 <div id='conteneur'>
-<canvas id="canvasElem" width="400" height="300">
+<canvas id="canvasElem" width="800" height="600" style="margin: 0 auto; display: block; border-top: 3px solid black; border-left: 3px solid black; border-right: 3px solid black;">
 
 </body>
 </html>
