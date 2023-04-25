@@ -1,3 +1,7 @@
 body {
     background: linear-gradient(to right, #00bfff, #00ff7f);
-  }
+}
+#scoreText {
+    font-weight: bold;
+    font-size: 1.5em;
+}

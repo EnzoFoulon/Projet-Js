@@ -36,6 +36,7 @@ var dirBalleY = -1;
 var boucleJeu;
 var limiteBriques = (Espace+Brique_Height)*Lignes;
 var Win = 0; 
+var Score = 0;
 window.addEventListener('load', function () {
 // canvas
 var elem = document.getElementById('canvasElem');
@@ -63,6 +64,9 @@ function refreshGame() {
 
 // Zone Clear
 clearContexte(context, 0, Jeu_Width, 0, Jeu_Height);
+
+// Réinitialisation score
+document.getElementById("scoreText").innerHTML = "Score : " + Score;
  
 // Réaffichage
  
@@ -103,6 +107,7 @@ var ligneX = Math.floor((balleX - Dim_Balle/2)/(Brique_Width+Espace));
 if ( ligneY >= 0 && ligneY < Lignes && ligneX >= 0 && ligneX < Brique_Ligne && tabBriques[ligneY][ligneX] == 1 ) {
   tabBriques[ligneY][ligneX] = 0;
   dirBalleY = 1;
+  Score+=5;
 }
 }
 balleX += dirBalleX * V_Balle;
@@ -145,7 +150,6 @@ function restartGame() {
   paddleX = (canvas.width - PADDLE_WIDTH) / 2;
   dx = 2;
   dy = -2;
-  score = 0;
   brickMatrix = createBrickMatrix();
 
   // Reprendre le jeu
@@ -196,9 +200,11 @@ tabBriques[i][j] = 1;
 } 
 return 1;
 }
+
+
 </script>
 <div id='conteneur'>
+<div id="scoreText">Score : 0</div>
 <canvas id="canvasElem" width="800" height="600" style="margin: 0 auto; display: block; border-top: 3px solid black; border-left: 3px solid black; border-right: 3px solid black;">
-
 </body>
 </html>
