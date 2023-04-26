@@ -37,6 +37,7 @@ var boucleJeu;
 var limiteBriques = (Espace+Brique_Height)*Lignes;
 var Win = 0; 
 var Score = 0;
+var isPaused = false;
 window.addEventListener('load', function () {
 // canvas
 var elem = document.getElementById('canvasElem');
@@ -134,6 +135,17 @@ function checkDepla(e) {
     moveBarre("right");
   }
 }
+// Pause 
+var pauseButton = document.getElementById("pauseButton");
+pauseButton.addEventListener("click", function() {
+  if (isPaused) {
+    boucleJeu = setInterval(refreshGame, 10);
+    isPaused = false;
+  } else {
+    clearInterval(boucleJeu);
+    isPaused = true;
+  }
+});
 // perdu
 function perdu() {
 clearInterval(boucleJeu);
@@ -146,14 +158,17 @@ else {
 }
 
 function restartGame() {
-  // Remettre les variables du jeu à leur état initial
-  paddleX = (canvas.width - PADDLE_WIDTH) / 2;
-  dx = 2;
-  dy = -2;
-  brickMatrix = createBrickMatrix();
-
-  // Reprendre le jeu
-  requestAnimationFrame(draw);
+  if (!isPaused) {
+        // Remettre les variables du jeu à leur état initial
+        paddleX = (canvas.width - PADDLE_WIDTH) / 2;
+        dx = 2;
+        dy = -2;
+        score = 0;
+        brickMatrix = createBrickMatrix();
+      
+        // Reprendre le jeu
+        requestAnimationFrame(draw);
+    }
 }
 }
 function nextlevel(){
@@ -206,5 +221,6 @@ return 1;
 <div id='conteneur'>
 <div id="scoreText">Score : 0</div>
 <canvas id="canvasElem" width="800" height="600" style="margin: 0 auto; display: block; border-top: 3px solid black; border-left: 3px solid black; border-right: 3px solid black;">
+<button onclick="pauseGame()">Pause</button>
 </body>
 </html>
