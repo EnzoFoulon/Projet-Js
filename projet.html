@@ -37,7 +37,7 @@ var boucleJeu;
 var limiteBriques = (Espace+Brique_Height)*Lignes;
 var Win = 0; 
 var Score = 0;
-var isPaused = false;
+var pauseJeu = false;
 window.addEventListener('load', function () {
 // canvas
 var elem = document.getElementById('canvasElem');
@@ -66,6 +66,15 @@ function refreshGame() {
 // Zone Clear
 clearContexte(context, 0, Jeu_Width, 0, Jeu_Height);
 
+//Jeu pause
+if (pauseJeu) {
+        // Affichage du message de pause
+        context.fillStyle = "#333333";
+        context.font = "bold 30px sans-serif";
+        context.fillText("Le jeu est en pause", Jeu_Width/2 - 150, Jeu_Height/2);
+        return;
+    }
+    
 // Réinitialisation score
 document.getElementById("scoreText").innerHTML = "Score : " + Score;
  
@@ -134,18 +143,14 @@ function checkDepla(e) {
   } else if (e.keyCode == 39) {
     moveBarre("right");
   }
-}
-// Pause 
-var pauseButton = document.getElementById("pauseButton");
-pauseButton.addEventListener("click", function() {
-  if (isPaused) {
-    boucleJeu = setInterval(refreshGame, 10);
-    isPaused = false;
-  } else {
-    clearInterval(boucleJeu);
-    isPaused = true;
+  window.addEventListener('keydown', function(event) {
+  if (event.key === 'p') {
+    pauseJeu = !pauseJeu;
+    document.getElementById("pauseText").innerHTML = pauseJeu ? "Jeu en pause" : "";
   }
-});
+}, false);
+}
+
 // perdu
 function perdu() {
 clearInterval(boucleJeu);
@@ -158,7 +163,6 @@ else {
 }
 
 function restartGame() {
-  if (!isPaused) {
         // Remettre les variables du jeu à leur état initial
         paddleX = (canvas.width - PADDLE_WIDTH) / 2;
         dx = 2;
@@ -168,7 +172,6 @@ function restartGame() {
       
         // Reprendre le jeu
         requestAnimationFrame(draw);
-    }
 }
 }
 function nextlevel(){
@@ -221,6 +224,5 @@ return 1;
 <div id='conteneur'>
 <div id="scoreText">Score : 0</div>
 <canvas id="canvasElem" width="800" height="600" style="margin: 0 auto; display: block; border-top: 3px solid black; border-left: 3px solid black; border-right: 3px solid black;">
-<button onclick="pauseGame()">Pause</button>
 </body>
 </html>
